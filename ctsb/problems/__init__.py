@@ -23,7 +23,7 @@ problem_register(
 )
 
 problem_register(
-    id='RNN-v1',
+    id='RNN-v0',
     entry_point='ctsb.problems.simulated:RNN_Output',
 )
 
@@ -42,7 +42,12 @@ problem_register(
 )
 
 problem_register(
-    id='UCI-Indoor-v0',
+    id='UCIIndoor-v0',
     entry_point='ctsb.problems.data_based:UCI_Indoor',
+)
+
+problem_register(
+    id='Crypto-v0',
+    entry_point='ctsb.problems.data_based:Crypto',
 )
 

@@ -3,6 +3,8 @@
 
 from ctsb import error
 import jax.numpy as np
+from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 # class for implementing algorithms with enforced modularity
 class Experiment(object):
@@ -34,7 +36,8 @@ class Experiment(object):
 
     def run_experiment(self, problem, obs, model):
         cur_x = obs
-        for i in range (0,self.T):
+        print ("running experiment: " + str(model) + " on " + str(problem))
+        for i in tqdm(range(0,self.T)):
             cur_y_pred = model.predict(cur_x)
             cur_y_true= problem.step()
             cur_loss = self.loss(cur_y_true, cur_y_pred)
@@ -42,6 +45,52 @@ class Experiment(object):
             model.update(cur_loss)
             cur_x = cur_y_true
         return
+
+    '''
+    def plot_single_problem_results(self, problem, model_list):
+        for model in model_list:
+            plt.plot(self.prob_model_to_loss[problem][model])
+        plt.title("Problem:" + str(problem) + " , Models:" + str(model_list))
+        plt.show(block=False)
+        plt.pause(10)
+        plt.close()
+    '''
+
+    def plot_all_problem_results(self):
+        all_problem_info = []
+        for problem, model_to_loss in self.prob_model_to_loss.items():
+            # print(problem)
+            problem_loss_plus_model = []
+            model_list = []
+            for model, loss in model_to_loss.items():
+                # print(model)
+                model_list.append(model)
+                problem_loss_plus_model.append((loss, model))
+            all_problem_info.append((problem, problem_loss_plus_model, model_list))
+
+        fig, ax = plt.subplots(nrows=len(self.pom_ls), ncols=1)
+        if len(self.pom_ls) == 1:
+            (problem, problem_loss_plus_model, model_list) = all_problem_info[0]
+            for (loss,model) in problem_loss_plus_model:
+                ax.plot(loss, label=str(model))
+                ax.legend(loc="upper left")
+            ax.set_title("Problem:" + str(problem))
+            ax.set_xlabel("timesteps")
+            ax.set_ylabel("loss")
+        else:
+            for i in range(len(self.pom_ls)):
+                (problem, problem_loss_plus_model, model_list) = all_problem_info[i]
+                for (loss, model) in problem_loss_plus_model:
+                    ax[i].plot(loss, label=str(model))
+                ax[i].set_title("Problem:" + str(problem), size=10)
+                ax[i].legend(loc="upper left")
+                ax[i].set_xlabel("timesteps")
+                ax[i].set_ylabel("loss")
+
+        fig.tight_layout()
+        plt.show(block=False)
+        plt.pause(100)
+        plt.close()        
 
     def get_prob_model_to_loss(self):
         return self.prob_model_to_loss
